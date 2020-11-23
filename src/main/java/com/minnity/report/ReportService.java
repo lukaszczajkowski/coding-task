@@ -23,14 +23,18 @@ public class ReportService {
   }
 
   //task 2: Count and return requests per company that finished with an error HTTP response code (>=400)
-  public Map<Integer, RequestLog> findRequestsWithError(List<RequestLog> requestLogs) {
-    Map<Integer, RequestLog> requestsWithError = new HashMap();
+  // NOTE: the return type changed to Map<Integer, Long> (companyId -> count) as per the email conversation
+  public Map<Integer, Long> findRequestsWithError(List<RequestLog> requestLogs) {
+    Map<Integer, Long> requestsWithError = new HashMap();
     requestLogs.stream()
                 .filter(requestLog -> requestLog.getRequestStatus()>=400)
                 .forEach(requestLog -> {
                   Integer companyId = requestLog.getCompanyId();
                   if(requestsWithError.containsKey(companyId)){
-
+                     Long count = requestsWithError.get(companyId) + 1;
+                     requestsWithError.put(companyId, count);
+                  } else {
+                      requestsWithError.put(companyId, 1L);
                   }
                 });
     return requestsWithError;

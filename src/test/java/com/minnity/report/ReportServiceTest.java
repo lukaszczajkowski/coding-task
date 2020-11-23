@@ -61,6 +61,18 @@ public class ReportServiceTest {
   }
 
   @Test
+  public void findRequestsWithErrorTest() {
+      reportService = new ReportService();
+      List<RequestLog> requestLogs = prepareRequestLogList(9);
+      Map<Integer, Long> expected = new HashMap<>(Map.of(2, 3L, 3, 3L ));
+
+      Map<Integer, Long> actual = reportService.findRequestsWithError(requestLogs);
+
+      assertEquals(expected, actual);
+
+  }
+
+  @Test
   public void findRequestPathWithLongestDurationTimeTest() {
       reportService = new ReportService();
       List<RequestLog> requestLogs = prepareRequestLogList(9);
@@ -71,10 +83,15 @@ public class ReportServiceTest {
   }
 
 
-  private RequestLog prepareRequestLog(String endpoint, long requestDuration) {
+  private RequestLog prepareRequestLog(String endpoint,
+                                       long requestDuration,
+                                       int requestStatus,
+                                       int companyId) {
     return RequestLog.RequestLogBuilder.aRequestLog()
             .withRequestPath(endpoint)
             .withRequestDuration(requestDuration)
+            .withRequestStatus(requestStatus)
+            .withCompanyId(companyId)
             .build();
   }
 
@@ -82,17 +99,25 @@ public class ReportServiceTest {
       List<RequestLog> requestLogs = new ArrayList<>();
       RequestLog requestLog = null;
       String endpoint = null;
+      int requestStatus = 0;
+      int companyId = 0;
 
       for(int i = 0; i < numOfLogs; i++) {
           long requestDuration = i * 100;
           if(i < 3) {
+              companyId = 1;
               endpoint = "/ping";
+              requestStatus = 200;
           } else if (i >= 3 && i < 6) {
+              companyId = 2;
               endpoint = "/users";
+              requestStatus = 500;
           } else {
               endpoint = "/vivaldi";
+              companyId = 3;
+              requestStatus = 404;
           }
-          requestLog = prepareRequestLog(endpoint, requestDuration);
+          requestLog = prepareRequestLog(endpoint, requestDuration, requestStatus, companyId);
           requestLogs.add(requestLog);
       }
 
